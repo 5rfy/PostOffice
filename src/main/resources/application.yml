@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5435/TestPostOffice
+    username: postgres
+    password: pass
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
