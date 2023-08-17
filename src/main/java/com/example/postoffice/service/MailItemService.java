@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -25,18 +27,28 @@ public class MailItemService {
     private final MailItemRepository mailItemRepository;
     private final PostOfficeService postOfficeService;
     private final MailStatusService mailStatusService;
+
+    private final static String[] typeMail = {"Mail", "Box", "ParcelPost", "Postcard"};
     @Transactional
     public ResponseEntity<String> registerNewMail(MailItemRequest mailItemRequest) {
-        MailItem newMailItem = MailItem.builder()
-                .type(mailItemRequest.getType())
-                .recipientIndex(mailItemRequest.getRecipientIndex())
-                .recipientAddress(mailItemRequest.getRecipientAddress())
-                .recipientName(mailItemRequest.getRecipientName())
-                .build();
+            MailItem newMailItem = MailItem.builder()
+                    .type(mailItemRequest.getType())
+                    .recipientIndex(mailItemRequest.getRecipientIndex())
+                    .recipientAddress(mailItemRequest.getRecipientAddress())
+                    .recipientName(mailItemRequest.getRecipientName())
+                    .build();
         try {
+            Arrays.stream(typeMail)
+                    .filter(type -> type.contains(newMailItem.getType()))
+                    .findFirst()
+                    .orElseThrow(IllegalArgumentException::new);
+
             mailItemRepository.save(newMailItem);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body("Mail item registered with id: " + newMailItem.getId());
+        }catch (IllegalArgumentException illegalArgumentException){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Parcel type only: Mail, Box, ParcelPost, Postcard");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error registering mail item: " + newMailItem.getId());
