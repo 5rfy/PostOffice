@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,18 +27,18 @@ public class MailItemService {
     private final PostOfficeService postOfficeService;
     private final MailStatusService mailStatusService;
 
-    private final static String[] typeMail = {"Mail", "Box", "ParcelPost", "Postcard"};
+    private final static String[] typeMail = {"mail", "box", "parcelpost", "postcard"};
     @Transactional
     public ResponseEntity<String> registerNewMail(MailItemRequest mailItemRequest) {
-            MailItem newMailItem = MailItem.builder()
-                    .type(mailItemRequest.getType())
-                    .recipientIndex(mailItemRequest.getRecipientIndex())
-                    .recipientAddress(mailItemRequest.getRecipientAddress())
-                    .recipientName(mailItemRequest.getRecipientName())
-                    .build();
+        MailItem newMailItem = MailItem.builder()
+                .type(mailItemRequest.getType())
+                .recipientIndex(mailItemRequest.getRecipientIndex())
+                .recipientAddress(mailItemRequest.getRecipientAddress())
+                .recipientName(mailItemRequest.getRecipientName())
+                .build();
         try {
             Arrays.stream(typeMail)
-                    .filter(type -> type.contains(newMailItem.getType()))
+                    .filter(type -> type.contains(newMailItem.getType().toLowerCase()))
                     .findFirst()
                     .orElseThrow(IllegalArgumentException::new);
 
@@ -53,7 +52,6 @@ public class MailItemService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error registering mail item: " + newMailItem.getId());
         }
-
     }
 
     @Transactional
@@ -193,3 +191,4 @@ public class MailItemService {
                 .build();
     }
 }
+
